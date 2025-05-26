@@ -1,0 +1,357 @@
+-- 用户表 (user)
+CREATE TABLE user (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,                -- 用户ID
+    username VARCHAR(50) NOT NULL,                         -- 用户名
+    password VARCHAR(255) NOT NULL,                        -- 密码
+    real_name VARCHAR(100),                                -- 真实姓名
+    email VARCHAR(100),                                    -- 邮箱
+    phone VARCHAR(20),                                     -- 电话
+    title VARCHAR(50),                                     -- 职称
+    department VARCHAR(100),                               -- 院系
+    teaching_research_office VARCHAR(100),                 -- 教研室
+    research_direction VARCHAR(100),                       -- 研究方向
+    role ENUM('教师', '教研室主任', '管理员') NOT NULL,      -- 角色
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,        -- 创建时间
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP -- 更新时间
+);
+
+-- 用户登录日志表 (user_login_log)
+CREATE TABLE user_login_log (
+    log_id INT AUTO_INCREMENT PRIMARY KEY,                 -- 日志ID
+    user_id INT NOT NULL,                                  -- 用户ID
+    login_ip VARCHAR(45),                                  -- 登录IP
+    login_time DATETIME DEFAULT CURRENT_TIMESTAMP,         -- 登录时间
+    logout_time DATETIME,                                  -- 登出时间
+    FOREIGN KEY (user_id) REFERENCES user(user_id)
+);
+
+-- 成果类型表 (achievement_type)
+CREATE TABLE achievement_type (
+    type_id INT AUTO_INCREMENT PRIMARY KEY,                -- 成果类型ID
+    type_name VARCHAR(100) NOT NULL,                       -- 成果类型名称
+    description TEXT,                                      -- 类型描述
+    score_rule TEXT,                                       -- 评分规则
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP         -- 创建时间
+);
+
+-- 成果主表（所有成果的共同字段）
+CREATE TABLE achievement (
+    achievement_id INT AUTO_INCREMENT PRIMARY KEY,         -- 成果ID
+    user_id INT NOT NULL,                                  -- 上传者ID
+    type_id INT NOT NULL,                                  -- 成果类型ID
+    title VARCHAR(255) NOT NULL,                           -- 成果名称
+    status ENUM('待审核', '已通过', '未通过') NOT NULL,      -- 成果状态
+    department_review_status ENUM('待审核', '已通过', '未通过') DEFAULT '待审核', -- 教研室审核状态
+    admin_review_status ENUM('待审核', '已通过', '未通过') DEFAULT '待审核',     -- 管理员审核状态
+    reject_reason TEXT,                                    -- 驳回原因
+    teaching_research_office VARCHAR(100),                 -- 所属教研室
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,        -- 创建时间
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- 更新时间
+    FOREIGN KEY (user_id) REFERENCES user(user_id),
+    FOREIGN KEY (type_id) REFERENCES achievement_type(type_id)
+);
+
+-- 论文成果子表
+CREATE TABLE achievement_paper (
+    achievement_id INT PRIMARY KEY,                        -- 成果ID
+    journal_name VARCHAR(255),                             -- 期刊名称
+    publication_date DATE,                                 -- 发表日期
+    volume VARCHAR(50),                                    -- 卷号
+    issue VARCHAR(50),                                     -- 期号
+    page_range VARCHAR(50),                                -- 页码范围
+    authors TEXT,                                          -- 作者列表
+    abstract TEXT,                                         -- 摘要
+    keywords VARCHAR(255),                                 -- 关键词
+    level VARCHAR(50),                                     -- 级别
+    score INT,                                             -- 分值
+    file_path VARCHAR(255),                                -- 文件路径
+    file_name VARCHAR(255),                                -- 文件名
+    ocr_content TEXT,                                      -- OCR内容
+    FOREIGN KEY (achievement_id) REFERENCES achievement(achievement_id)
+);
+
+-- 专利成果子表
+CREATE TABLE achievement_patent (
+    achievement_id INT PRIMARY KEY,                        -- 成果ID
+    patent_number VARCHAR(100),                            -- 专利号
+    patent_type VARCHAR(50),                               -- 专利类型
+    application_date DATE,                                 -- 申请日期
+    grant_date DATE,                                       -- 授权日期
+    inventors TEXT,                                        -- 发明人列表
+    abstract TEXT,                                         -- 摘要
+    level VARCHAR(50),                                     -- 级别
+    score INT,                                             -- 分值
+    file_path VARCHAR(255),                                -- 文件路径
+    file_name VARCHAR(255),                                -- 文件名
+    ocr_content TEXT,                                      -- OCR内容
+    FOREIGN KEY (achievement_id) REFERENCES achievement(achievement_id)
+);
+
+-- 项目成果子表
+CREATE TABLE achievement_project (
+    achievement_id INT PRIMARY KEY,                        -- 成果ID
+    project_number VARCHAR(100),                           -- 项目编号
+    project_type VARCHAR(50),                              -- 项目类型
+    start_date DATE,                                       -- 开始日期
+    end_date DATE,                                         -- 结束日期
+    fund_amount DECIMAL(10,2),                             -- 经费金额
+    members TEXT,                                          -- 项目成员
+    description TEXT,                                      -- 项目描述
+    level VARCHAR(50),                                     -- 级别
+    score INT,                                             -- 分值
+    file_path VARCHAR(255),                                -- 文件路径
+    file_name VARCHAR(255),                                -- 文件名
+    ocr_content TEXT,                                      -- OCR内容
+    FOREIGN KEY (achievement_id) REFERENCES achievement(achievement_id)
+);
+
+-- 著作成果子表
+CREATE TABLE achievement_book (
+    achievement_id INT PRIMARY KEY,                        -- 成果ID
+    publisher VARCHAR(255),                                -- 出版社
+    publication_date DATE,                                 -- 出版日期
+    isbn VARCHAR(50),                                      -- ISBN号
+    authors TEXT,                                          -- 作者列表
+    word_count INT,                                        -- 字数
+    level VARCHAR(50),                                     -- 级别
+    score INT,                                             -- 分值
+    file_path VARCHAR(255),                                -- 文件路径
+    file_name VARCHAR(255),                                -- 文件名
+    ocr_content TEXT,                                      -- OCR内容
+    FOREIGN KEY (achievement_id) REFERENCES achievement(achievement_id)
+);
+
+-- 软件著作权子表
+CREATE TABLE achievement_software (
+    achievement_id INT PRIMARY KEY,                        -- 成果ID
+    registration_number VARCHAR(100),                      -- 登记号
+    registration_date DATE,                                -- 登记日期
+    developers TEXT,                                       -- 开发者列表
+    description TEXT,                                      -- 软件描述
+    level VARCHAR(50),                                     -- 级别
+    score INT,                                             -- 分值
+    file_path VARCHAR(255),                                -- 文件路径
+    file_name VARCHAR(255),                                -- 文件名
+    ocr_content TEXT,                                      -- OCR内容
+    FOREIGN KEY (achievement_id) REFERENCES achievement(achievement_id)
+);
+
+-- 个人获奖子表
+CREATE TABLE achievement_award (
+    achievement_id INT PRIMARY KEY,                        -- 成果ID
+    award_name VARCHAR(255),                               -- 奖项名称
+    award_level VARCHAR(50),                               -- 获奖级别
+    award_date DATE,                                       -- 获奖日期
+    award_organization VARCHAR(255),                       -- 颁奖机构
+    description TEXT,                                      -- 获奖描述
+    level VARCHAR(50),                                     -- 级别
+    score INT,                                             -- 分值
+    file_path VARCHAR(255),                                -- 文件路径
+    file_name VARCHAR(255),                                -- 文件名
+    ocr_content TEXT,                                      -- OCR内容
+    FOREIGN KEY (achievement_id) REFERENCES achievement(achievement_id)
+);
+
+-- 科研指导子表
+CREATE TABLE achievement_guidance (
+    achievement_id INT PRIMARY KEY,                        -- 成果ID
+    student_name VARCHAR(100),                             -- 学生姓名
+    student_id VARCHAR(50),                                -- 学号
+    guidance_type VARCHAR(50),                             -- 指导类型
+    start_date DATE,                                       -- 开始日期
+    end_date DATE,                                         -- 结束日期
+    description TEXT,                                      -- 指导描述
+    level VARCHAR(50),                                     -- 级别
+    score INT,                                             -- 分值
+    file_path VARCHAR(255),                                -- 文件路径
+    file_name VARCHAR(255),                                -- 文件名
+    ocr_content TEXT,                                      -- OCR内容
+    FOREIGN KEY (achievement_id) REFERENCES achievement(achievement_id)
+);
+
+-- 社会服务子表
+CREATE TABLE achievement_service (
+    achievement_id INT PRIMARY KEY,                        -- 成果ID
+    service_type VARCHAR(50),                              -- 服务类型
+    service_organization VARCHAR(255),                     -- 服务单位
+    start_date DATE,                                       -- 开始日期
+    end_date DATE,                                         -- 结束日期
+    description TEXT,                                      -- 服务描述
+    level VARCHAR(50),                                     -- 级别
+    score INT,                                             -- 分值
+    file_path VARCHAR(255),                                -- 文件路径
+    file_name VARCHAR(255),                                -- 文件名
+    ocr_content TEXT,                                      -- OCR内容
+    FOREIGN KEY (achievement_id) REFERENCES achievement(achievement_id)
+);
+
+-- 其他成果子表
+CREATE TABLE achievement_other (
+    achievement_id INT PRIMARY KEY,                        -- 成果ID
+    achievement_type VARCHAR(50),                          -- 成果类型
+    achievement_date DATE,                                 -- 成果日期
+    description TEXT,                                      -- 成果描述
+    level VARCHAR(50),                                     -- 级别
+    score INT,                                             -- 分值
+    file_path VARCHAR(255),                                -- 文件路径
+    file_name VARCHAR(255),                                -- 文件名
+    ocr_content TEXT,                                      -- OCR内容
+    FOREIGN KEY (achievement_id) REFERENCES achievement(achievement_id)
+);
+
+-- 成果审核记录表 (achievement_review)
+CREATE TABLE achievement_review (
+    review_id INT AUTO_INCREMENT PRIMARY KEY,
+    achievement_id INT NOT NULL,
+    reviewer_id INT NOT NULL,
+    review_result ENUM('通过', '驳回') NOT NULL,
+    review_comments TEXT,
+    review_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    score_adjustment INT,
+    FOREIGN KEY (achievement_id) REFERENCES achievement_paper(achievement_id),
+    FOREIGN KEY (reviewer_id) REFERENCES user(user_id)
+);
+
+-- 成果标签表 (achievement_tag)
+CREATE TABLE achievement_tag (
+    tag_id INT AUTO_INCREMENT PRIMARY KEY,
+    tag_name VARCHAR(100) NOT NULL,
+    tag_type VARCHAR(50) NOT NULL
+);
+
+-- 成果-标签关联表 (achievement_tag_relation)
+CREATE TABLE achievement_tag_relation (
+    relation_id INT AUTO_INCREMENT PRIMARY KEY,
+    achievement_id INT NOT NULL,
+    tag_id INT NOT NULL,
+    FOREIGN KEY (achievement_id) REFERENCES achievement_paper(achievement_id),
+    FOREIGN KEY (tag_id) REFERENCES achievement_tag(tag_id)
+);
+
+-- 评分规则表 (score_rule)
+CREATE TABLE score_rule (
+    rule_id INT AUTO_INCREMENT PRIMARY KEY,
+    rule_name VARCHAR(100) NOT NULL,
+    rule_type VARCHAR(50) NOT NULL,
+    rule_expression TEXT NOT NULL,
+    description TEXT,
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- 教师年度评分表 (teacher_year_score)
+CREATE TABLE teacher_year_score (
+    score_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    year INT NOT NULL,
+    total_score INT,
+    `rank` INT,
+    review_status ENUM('待审核', '已审核') NOT NULL,
+    reviewer_id INT,
+    review_time DATETIME,
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES user(user_id),
+    FOREIGN KEY (reviewer_id) REFERENCES user(user_id)
+);
+
+-- 评分明细表 (score_detail)
+CREATE TABLE score_detail (
+    detail_id INT AUTO_INCREMENT PRIMARY KEY,
+    score_id INT NOT NULL,
+    achievement_id INT NOT NULL,
+    base_score INT NOT NULL,
+    adjust_score INT,
+    final_score INT,
+    score_rule VARCHAR(255),
+    comments TEXT,
+    FOREIGN KEY (score_id) REFERENCES teacher_year_score(score_id),
+    FOREIGN KEY (achievement_id) REFERENCES achievement_paper(achievement_id)
+);
+
+-- 角色表 (role)
+CREATE TABLE role (
+    role_id INT AUTO_INCREMENT PRIMARY KEY,                -- 角色ID
+    role_name VARCHAR(100) NOT NULL,                       -- 角色名称
+    description TEXT,                                      -- 角色描述
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,        -- 创建时间
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP -- 更新时间
+);
+
+-- 权限表 (permission)
+CREATE TABLE permission (
+    permission_id INT AUTO_INCREMENT PRIMARY KEY,          -- 权限ID
+    permission_name VARCHAR(100) NOT NULL,                 -- 权限名称
+    permission_key VARCHAR(100) NOT NULL,                  -- 权限标识
+    description TEXT,                                      -- 权限描述
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP         -- 创建时间
+);
+
+-- 角色-权限关联表 (role_permission)
+CREATE TABLE role_permission (
+    relation_id INT AUTO_INCREMENT PRIMARY KEY,            -- 关联ID
+    role_id INT NOT NULL,                                  -- 角色ID
+    permission_id INT NOT NULL,                            -- 权限ID
+    FOREIGN KEY (role_id) REFERENCES role(role_id),
+    FOREIGN KEY (permission_id) REFERENCES permission(permission_id)
+);
+
+-- 用户-角色关联表 (user_role)
+CREATE TABLE user_role (
+    relation_id INT AUTO_INCREMENT PRIMARY KEY,            -- 关联ID
+    user_id INT NOT NULL,                                  -- 用户ID
+    role_id INT NOT NULL,                                  -- 角色ID
+    FOREIGN KEY (user_id) REFERENCES user(user_id),
+    FOREIGN KEY (role_id) REFERENCES role(role_id)
+);
+
+-- 通知表 (notification)
+CREATE TABLE notification (
+    notification_id INT AUTO_INCREMENT PRIMARY KEY,         -- 通知ID
+    sender_id INT NOT NULL,                                 -- 发送者ID
+    receiver_id INT NOT NULL,                               -- 接收者ID
+    title VARCHAR(255) NOT NULL,                            -- 通知标题
+    content TEXT NOT NULL,                                  -- 通知内容
+    type VARCHAR(50),                                       -- 通知类型
+    status ENUM('未读', '已读') NOT NULL DEFAULT '未读',     -- 通知状态
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,         -- 创建时间
+    read_time DATETIME,                                     -- 阅读时间
+    FOREIGN KEY (sender_id) REFERENCES user(user_id),
+    FOREIGN KEY (receiver_id) REFERENCES user(user_id)
+);
+
+-- 数据统计报表表 (stat_report)
+CREATE TABLE stat_report (
+    report_id INT AUTO_INCREMENT PRIMARY KEY,               -- 报表ID
+    report_name VARCHAR(100) NOT NULL,                      -- 报表名称
+    report_type VARCHAR(50) NOT NULL,                       -- 报表类型
+    report_params TEXT,                                     -- 报表参数
+    report_data JSON,                                       -- 报表数据
+    create_user_id INT NOT NULL,                            -- 创建者ID
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,         -- 创建时间
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- 更新时间
+    FOREIGN KEY (create_user_id) REFERENCES user(user_id)
+);
+
+-- 系统信息表 (system_notice)
+CREATE TABLE system_notice (
+    notice_id INT AUTO_INCREMENT PRIMARY KEY,               -- 通知ID
+    title VARCHAR(255) NOT NULL,                            -- 通知标题
+    content TEXT NOT NULL,                                  -- 通知内容
+    publisher_id INT NOT NULL,                              -- 发布者ID
+    publish_time DATETIME DEFAULT CURRENT_TIMESTAMP,        -- 发布时间
+    status ENUM('已发布', '已撤回') DEFAULT '已发布',         -- 通知状态
+    FOREIGN KEY (publisher_id) REFERENCES user(user_id)
+);
+
+-- 初始化成果类型数据
+INSERT INTO achievement_type (type_name, description) VALUES
+('论文成果', '学术论文发表'),
+('专利成果', '发明专利、实用新型专利等'),
+('项目成果', '科研项目、教改项目等'),
+('著作成果', '教材、专著等'),
+('软件著作权', '计算机软件著作权'),
+('个人获奖', '教学、科研等各类奖项'),
+('科研指导', '指导学生科研项目等'),
+('社会服务', '社会服务、产学研合作等'),
+('其他成果', '其他类型的成果');

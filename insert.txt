@@ -1,0 +1,96 @@
+-- ------------ 1. 用户表数据 ------------
+INSERT INTO user (username, password, real_name, email, phone, title, department, teaching_research_office, research_direction, role) VALUES
+('xiaoming', 'm123456', '小明', 'xiaoming@edu.cn', '13800138001', '副教授', '计算机学院', '软件工程教研室', '人工智能', '教师'),
+('lilei', 'l123456', '李雷', 'lilei@edu.cn', '13800138002', '教授', '数学学院', '应用数学教研室', '微分方程', '教研室主任'),
+('hanmei', 'h123456', '韩梅', 'hanmei@edu.cn', '13800138003', '讲师', '外国语学院', '英语教研室', '翻译学', '教师'),
+('admin', 'admin123', '张管理员', 'admin@edu.cn', '13800138004', NULL, '行政部', NULL, NULL, '管理员'),
+('wangfang', 'w123456', '王芳', 'wangfang@edu.cn', '13800138005', '副教授', '物理学院', '理论物理教研室', '量子力学', '教师'),
+('liuqiang', 'q123456', '刘强', 'liuqiang@edu.cn', '13800138006', '教授', '化学学院', '有机化学教研室', '合成化学', '教研室主任'),
+('zhaoyan', 'z123456', '赵燕', 'zhaoyan@edu.cn', '13800138007', '讲师', '历史学院', '中国古代史教研室', '唐宋史', '教师'),
+('sunwei', 's123456', '孙伟', 'sunwei@edu.cn', '13800138008', '副教授', '经济学院', '金融学教研室', '宏观经济', '教师'),
+('chenxi', 'c123456', '陈曦', 'chenxi@edu.cn', '13800138009', '教授', '法学院', '民商法教研室', '合同法', '教研室主任'),
+('zhouhua', 'h123456', '周华', 'zhouhua@edu.cn', '13800138010', '讲师', '艺术学院', '音乐教研室', '声乐教育', '教师');
+
+-- ------------ 2. 成果类型初始化 ------------
+INSERT INTO achievement_type (type_name, description) VALUES
+('论文成果', '学术论文发表'),
+('专利成果', '发明专利、实用新型专利等'),
+('项目成果', '科研项目、教改项目等'),
+('著作成果', '教材、专著等'),
+('软件著作权', '计算机软件著作权'),
+('个人获奖', '教学、科研等各类奖项'),
+('科研指导', '指导学生科研项目等'),
+('社会服务', '社会服务、产学研合作等'),
+('其他成果', '其他类型的成果');
+
+-- ------------ 3. 成果主表数据 ------------
+INSERT INTO achievement (user_id, type_id, title, status, department_review_status, admin_review_status, teaching_research_office) VALUES
+-- 论文成果（type_id=1）
+(1, 1, '成果1：深度学习在图像识别中的应用', '已通过', '已通过', '已通过', '软件工程教研室'),
+(5, 1, '成果2：量子计算理论研究', '待审核', '待审核', '待审核', '理论物理教研室'),
+(8, 1, '成果3：宏观经济模型分析', '未通过', '未通过', '未通过', '金融学教研室'),
+
+-- 专利成果（type_id=2）
+(2, 2, '成果4：新型数学教具专利', '已通过', '已通过', '已通过', '应用数学教研室'),
+(6, 2, '成果5：有机合成催化剂专利', '待审核', '已通过', '待审核', '有机化学教研室'),
+(9, 2, '成果6：民商法案例数据库专利', '已通过', '已通过', '已通过', '民商法教研室'),
+
+-- 项目成果（type_id=3）
+(3, 3, '成果7：英语翻译教学改革项目', '已通过', '已通过', '已通过', '英语教研室'),
+(7, 3, '成果8：唐宋史文献整理项目', '待审核', '待审核', '待审核', '中国古代史教研室'),
+(10, 3, '成果9：声乐教育实践项目', '未通过', '未通过', '未通过', '音乐教研室'),
+
+-- 其他成果类型（补充至30条）
+(4, 4, '成果10：《人工智能导论》教材', '已通过', '已通过', '已通过', NULL),
+(1, 5, '成果11：智能教学软件著作权', '待审核', '待审核', '待审核', '软件工程教研室'),
+(5, 6, '成果12：优秀教师奖', '已通过', '已通过', '已通过', '理论物理教研室'),
+(8, 7, '成果13：指导学生科研项目', '未通过', '未通过', '未通过', '金融学教研室'),
+(2, 8, '成果14：社区法律咨询服务', '已通过', '已通过', '已通过', '应用数学教研室'),
+(6, 9, '成果15：化学实验室安全管理方案', '待审核', '待审核', '待审核', '有机化学教研室');
+
+-- ------------ 4. 成果子表数据 ------------
+-- 论文子表
+INSERT INTO achievement_paper (achievement_id, journal_name, publication_date, authors, level, score) VALUES
+(1, '人工智能学报', '2023-01-15', '小明, 李雷', '核心期刊', 20),
+(2, '物理研究', '2023-03-20', '王芳, 孙伟', 'SCI一区', 30);
+
+-- 专利子表
+INSERT INTO achievement_patent (achievement_id, patent_number, inventors, level, score) VALUES
+(4, 'ZL202310000001', '李雷, 韩梅', '发明专利', 40),
+(5, 'ZL202310000002', '刘强, 陈曦', '实用新型', 25);
+
+-- ------------ 5. 修正外键约束 ------------
+-- 删除原错误外键（关联到 achievement_paper）
+ALTER TABLE achievement_review DROP FOREIGN KEY achievement_review_ibfk_1;
+
+-- 添加正确外键（关联到主表 achievement）
+ALTER TABLE achievement_review 
+  ADD FOREIGN KEY (achievement_id) REFERENCES achievement(achievement_id);
+
+-- ------------ 6. 插入审核记录 ------------
+INSERT INTO achievement_review (achievement_id, reviewer_id, review_result, review_comments) VALUES
+(1, 4, '通过', '研究内容详实，符合要求'),   -- 论文成果（关联到 achievement_id=1）
+(4, 4, '通过', '专利设计具有创新性'),     -- 专利成果（关联到 achievement_id=4）
+(7, 4, '通过', '项目成果审核通过');      -- 项目成果（关联到 achievement_id=7）
+
+-- ------------ 7. 其他关联数据 ------------
+-- 评分表
+INSERT INTO teacher_year_score (user_id, year, total_score, review_status) VALUES
+(1, 2023, 150, '已审核'),
+(2, 2023, 200, '待审核');
+
+-- 权限表
+INSERT INTO role (role_name, description) VALUES
+('教师', '普通教师权限'),
+('教研室主任', '教研室管理权限'),
+('管理员', '系统管理权限');
+
+INSERT INTO permission (permission_name, permission_key) VALUES
+('成果上传', 'achievement:upload'),
+('成果审核', 'achievement:review');
+
+INSERT INTO role_permission (role_id, permission_id) VALUES
+(1, 1),  -- 教师可上传
+(2, 1),  -- 教研室主任可上传
+(2, 2),  -- 教研室主任可审核
+(3, 2);  -- 管理员可审核
